@@ -2,6 +2,30 @@
   "identity": {
     "file_name": "identity.json"
   },
+  "task1_full_glm": {
+    "file_name": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json"
+  },
+  "task1_full_llama": {
+    "file_name": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json"
+  },
+  "task1_small_glm": {
+    "file_name": "data_table/task1/small_8k/alpaca_megafake_glm_8k.json"
+  },
+  "task1_small_llama": {
+    "file_name": "data_table/task1/small_8k/alpaca_megafake_llama_8k.json"
+  },
+  "task3_full_gossip": {
+    "file_name": "data_table/task3/alpaca_full/alpaca_chatglm_gossip_binary.json"
+  },
+  "task3_full_polifact": {
+    "file_name": "data_table/task3/alpaca_full/alpaca_chatglm_polifact_binary.json"
+  },
+  "task3_small_gossip": {
+    "file_name": "data_table/task3/small_8k/alpaca_chatglm_gossip_8k.json"
+  },
+  "task3_small_polifact": {
+    "file_name": "data_table/task3/small_8k/alpaca_chatglm_polifact_8k.json"
+  },
   "alpaca_en_demo": {
     "file_name": "alpaca_en_demo.json"
   },

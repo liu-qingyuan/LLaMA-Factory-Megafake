@@ -175,6 +175,8 @@ saves/
 output/
 wandb/
 swanlog/
+
+/logs
 generated_predictions.jsonl
 predictions_score.json
 download_models.sh
