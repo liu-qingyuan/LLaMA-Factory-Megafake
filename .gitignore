@@ -177,9 +177,9 @@ wandb/
 swanlog/
 
 /logs
+/megafakeTasks
 generated_predictions.jsonl
 predictions_score.json
 download_models.sh
-MegaFakeV2_data_table.zip
 data/data_table/
 *.zip
