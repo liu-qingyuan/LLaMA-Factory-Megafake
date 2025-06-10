@@ -17,12 +17,45 @@ MODEL_CONFIGS = {
 
 # 数据集配置
 DATASET_CONFIGS = {
-    "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
-    "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
+    # "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
+    # "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
     # "task1_small_glm": "data_table/task1/small_8k/alpaca_megafake_glm_8k.json",
     # "task1_small_llama": "data_table/task1/small_8k/alpaca_megafake_llama_8k.json",
-    "task3_full_gossip": "data_table/task3/alpaca_full/alpaca_chatglm_gossip_binary.json",
-    "task3_full_polifact": "data_table/task3/alpaca_full/alpaca_chatglm_polifact_binary.json",
+    
+    # Task2 - GLM 假新闻子类
+    "task2_full_glm_style_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_fake.json",
+    "task2_full_glm_content_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_content_based_fake.json",
+    "task2_full_glm_integration_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_integration_based_fake.json",
+    "task2_full_glm_story_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_story_based_fake.json",
+    # Task2 - GLM 真新闻子类
+    "task2_full_glm_style_based_legitimate": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_legitimate.json",
+    "task2_full_glm_integration_based_legitimate": "data_table/task2/alpaca_full/glm/alpaca_glm_integration_based_legitimate.json",
+    
+    # Task2 - LLaMA 假新闻子类
+    "task2_full_llama_style_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_fake.json",
+    "task2_full_llama_content_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_content_based_fake.json",
+    "task2_full_llama_integration_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_integration_based_fake.json",
+    "task2_full_llama_story_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_story_based_fake.json",
+    # Task2 - LLaMA 真新闻子类
+    "task2_full_llama_style_based_legitimate": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_legitimate.json",
+    "task2_full_llama_integration_based_legitimate": "data_table/task2/alpaca_full/llama/alpaca_llama3_integration_based_legitimate.json",
+    
+    # Task2 - 8K 采样数据集（注释掉以减少任务量，需要时可取消注释）
+    # "task2_small_glm_style_based_fake": "data_table/task2/small_8k/glm/alpaca_glm_style_based_fake_8k.json",
+    # "task2_small_glm_content_based_fake": "data_table/task2/small_8k/glm/alpaca_glm_content_based_fake_8k.json",
+    # "task2_small_glm_integration_based_fake": "data_table/task2/small_8k/glm/alpaca_glm_integration_based_fake_8k.json",
+    # "task2_small_glm_story_based_fake": "data_table/task2/small_8k/glm/alpaca_glm_story_based_fake_8k.json",
+    # "task2_small_glm_style_based_legitimate": "data_table/task2/small_8k/glm/alpaca_glm_style_based_legitimate_8k.json",
+    # "task2_small_glm_integration_based_legitimate": "data_table/task2/small_8k/glm/alpaca_glm_integration_based_legitimate_8k.json",
+    # "task2_small_llama_style_based_fake": "data_table/task2/small_8k/llama/alpaca_llama3_style_based_fake_8k.json",
+    # "task2_small_llama_content_based_fake": "data_table/task2/small_8k/llama/alpaca_llama3_content_based_fake_8k.json",
+    # "task2_small_llama_integration_based_fake": "data_table/task2/small_8k/llama/alpaca_llama3_integration_based_fake_8k.json",
+    # "task2_small_llama_story_based_fake": "data_table/task2/small_8k/llama/alpaca_llama3_story_based_fake_8k.json",
+    # "task2_small_llama_style_based_legitimate": "data_table/task2/small_8k/llama/alpaca_llama3_style_based_legitimate_8k.json",
+    # "task2_small_llama_integration_based_legitimate": "data_table/task2/small_8k/llama/alpaca_llama3_integration_based_legitimate_8k.json",
+    
+    # "task3_full_gossip": "data_table/task3/alpaca_full/alpaca_chatglm_gossip_binary.json",
+    # "task3_full_polifact": "data_table/task3/alpaca_full/alpaca_chatglm_polifact_binary.json",
     # "task3_small_gossip": "data_table/task3/small_8k/alpaca_chatglm_gossip_8k.json",
     # "task3_small_polifact": "data_table/task3/small_8k/alpaca_chatglm_polifact_8k.json"
 }
@@ -47,6 +80,39 @@ def get_save_path(model_path, dataset_name):
             data_type = "megafake_glm_binary"
         else:
             data_type = "megafake_llama_binary"
+            
+    elif "task2" in dataset_name:
+        task = "task2"
+        if "full" in dataset_name:
+            size = "full"
+        else:
+            size = "small"
+        
+        # 解析 Task2 的子类信息
+        parts = dataset_name.split("_")
+        # 格式: task2_full_glm_style_based_fake 或 task2_full_llama_content_based_legitimate
+        model_source = parts[2]  # glm 或 llama
+        
+        # 找到最后一个部分作为 news_type (fake 或 legitimate)
+        news_type = parts[-1]
+        
+        # 提取子类名称 (style, content, integration, story)
+        # 从 parts[3] 开始到倒数第二个部分，去掉 "based"
+        subclass_parts = parts[3:-1]
+        if "based" in subclass_parts:
+            subclass_parts.remove("based")
+        subclass = "_".join(subclass_parts)
+        
+        if model_source == "glm":
+            if news_type == "fake":
+                data_type = f"glm_{subclass}_based_fake"
+            else:
+                data_type = f"glm_{subclass}_based_legitimate"
+        else:  # llama
+            if news_type == "fake":
+                data_type = f"llama3_{subclass}_based_fake"
+            else:
+                data_type = f"llama3_{subclass}_based_legitimate"
             
     elif "task3" in dataset_name:
         task = "task3"

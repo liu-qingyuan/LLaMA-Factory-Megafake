@@ -50,42 +50,6 @@
   "task2_full_llama_style_based_legitimate": {
     "file_name": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_legitimate.json"
   },
-  "task2_small_glm_content_based_fake": {
-    "file_name": "data_table/task2/small_8k/glm/alpaca_glm_content_based_fake_8k.json"
-  },
-  "task2_small_glm_integration_based_fake": {
-    "file_name": "data_table/task2/small_8k/glm/alpaca_glm_integration_based_fake_8k.json"
-  },
-  "task2_small_glm_integration_based_legitimate": {
-    "file_name": "data_table/task2/small_8k/glm/alpaca_glm_integration_based_legitimate_8k.json"
-  },
-  "task2_small_glm_story_based_fake": {
-    "file_name": "data_table/task2/small_8k/glm/alpaca_glm_story_based_fake_8k.json"
-  },
-  "task2_small_glm_style_based_fake": {
-    "file_name": "data_table/task2/small_8k/glm/alpaca_glm_style_based_fake_8k.json"
-  },
-  "task2_small_glm_style_based_legitimate": {
-    "file_name": "data_table/task2/small_8k/glm/alpaca_glm_style_based_legitimate_8k.json"
-  },
-  "task2_small_llama_content_based_fake": {
-    "file_name": "data_table/task2/small_8k/llama/alpaca_llama3_content_based_fake_8k.json"
-  },
-  "task2_small_llama_integration_based_fake": {
-    "file_name": "data_table/task2/small_8k/llama/alpaca_llama3_integration_based_fake_8k.json"
-  },
-  "task2_small_llama_integration_based_legitimate": {
-    "file_name": "data_table/task2/small_8k/llama/alpaca_llama3_integration_based_legitimate_8k.json"
-  },
-  "task2_small_llama_story_based_fake": {
-    "file_name": "data_table/task2/small_8k/llama/alpaca_llama3_story_based_fake_8k.json"
-  },
-  "task2_small_llama_style_based_fake": {
-    "file_name": "data_table/task2/small_8k/llama/alpaca_llama3_style_based_fake_8k.json"
-  },
-  "task2_small_llama_style_based_legitimate": {
-    "file_name": "data_table/task2/small_8k/llama/alpaca_llama3_style_based_legitimate_8k.json"
-  },
   "task3_full_gossip": {
     "file_name": "data_table/task3/alpaca_full/alpaca_chatglm_gossip_binary.json"
   },
