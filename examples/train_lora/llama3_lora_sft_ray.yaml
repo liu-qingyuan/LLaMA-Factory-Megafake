@@ -1,5 +1,5 @@
 ### model
-model_name_or_path: meta-llama/Meta-Llama-3-8B-Instruct  # or use local absolute path
+model_name_or_path: /root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct/  # or use local absolute path
 trust_remote_code: true
 
 ### method
@@ -10,7 +10,7 @@ lora_rank: 8
 lora_target: all
 
 ### dataset
-dataset: identity,alpaca_en_demo
+dataset: task1_small_glm
 dataset_dir: REMOTE:llamafactory/demo_data  # or use local absolute path
 template: llama3
 cutoff_len: 2048
@@ -31,7 +31,7 @@ report_to: none  # choices: [none, wandb, tensorboard, swanlab, mlflow]
 ### ray
 ray_run_name: llama3_8b_sft_lora
 ray_storage_path: ./saves
-ray_num_workers: 4  # Number of GPUs to use.
+ray_num_workers: 1  # Number of GPUs to use.
 placement_strategy: PACK
 resources_per_worker:
   GPU: 1
@@ -52,6 +52,8 @@ warmup_ratio: 0.1
 bf16: true
 ddp_timeout: 180000000
 resume_from_checkpoint: null
+# activate flash attention 2
+flash_attn: fa2
 
 ### eval
 # eval_dataset: alpaca_en_demo

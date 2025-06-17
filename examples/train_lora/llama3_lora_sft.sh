@@ -15,7 +15,7 @@ llamafactory-cli train \
     --dataset identity,alpaca_en_demo \
     --template llama3 \
     --cutoff_len 2048 \
-    --max_samples 1000 \
+    --max_samples 8000 \
     --overwrite_cache \
     --preprocessing_num_workers 16 \
     --dataloader_num_workers 4 \
@@ -29,7 +29,7 @@ llamafactory-cli train \
     --per_device_train_batch_size 1 \
     --gradient_accumulation_steps 8 \
     --learning_rate 1e-4 \
-    --num_train_epochs 3.0 \
+    --num_train_epochs 1.0 \
     --lr_scheduler_type cosine \
     --warmup_ratio 0.1 \
     --bf16 \
