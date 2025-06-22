@@ -8,17 +8,17 @@ import datetime
 
 # 模型配置：模型路径 -> 模板名称
 MODEL_CONFIGS = {
-    "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
-    "/root/autodl-tmp/models/chatglm3-6b": "chatglm3", 
-    "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": "llama3",
-    "/root/autodl-tmp/models/Mistral-7B-v0.1": "mistral",
-    "/root/autodl-tmp/models/Qwen1.5-7B": "qwen"
+    # "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
+    # "/root/autodl-tmp/models/chatglm3-6b": "chatglm3", 
+    # "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": "llama3",
+    "/root/autodl-tmp/models/Mistral-7B-Instruct-v0.1": "mistral",
+    # "/root/autodl-tmp/models/Qwen1.5-7B": "qwen"
 }
 
 # 数据集配置
 DATASET_CONFIGS = {
-    # "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
-    # "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
+    "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
+    "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
     # "task1_small_glm": "data_table/task1/small_8k/alpaca_megafake_glm_8k.json",
     # "task1_small_llama": "data_table/task1/small_8k/alpaca_megafake_llama_8k.json",
     
@@ -137,7 +137,7 @@ def get_log_path(model_path, dataset_name):
     log_filename = f"inference_{model_name}_{dataset_name}_{timestamp}.log"
     return f"logs/{log_filename}"
 
-def run_inference(model_path, template, dataset_name, save_path, max_new_tokens=10):
+def run_inference(model_path, template, dataset_name, save_path, max_new_tokens=30):
     """运行单个推理任务"""
     cmd = [
         "python", "scripts/vllm_infer.py",

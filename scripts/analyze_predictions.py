@@ -397,6 +397,23 @@ def get_model_name_from_path(file_path):
     else:
         return "Unknown"
 
+def get_dataset_from_path(file_path):
+    """从文件路径中提取数据集信息（训练和推理使用同一个数据集）"""
+    filename = os.path.basename(file_path)
+    
+    # Task1和Task2的数据集识别
+    if "_glm_" in filename:
+        return "ChatGLM Dataset"
+    elif "_llama3_" in filename or "_llama_" in filename:
+        return "LLaMA Dataset"
+    # Task3使用的是特定数据集
+    elif "_gossip_" in filename:
+        return "GossipCop Dataset"
+    elif "_polifact_" in filename:
+        return "PolitiFact Dataset"
+    else:
+        return "Unknown"
+
 def analyze_predictions(file_path):
     """分析单个文件的预测结果"""
     print(f"\n📊 分析文件: {file_path}")
@@ -436,6 +453,7 @@ def analyze_predictions(file_path):
     result = {
         'file_path': file_path,
         'model_name': get_model_name_from_path(file_path),
+        'dataset': get_dataset_from_path(file_path),
         'task_type': task_type,
         'task2_subclass': task2_subclass,
         'total_samples': len(data),
@@ -511,9 +529,11 @@ def export_binary_task_csv(results, output_file, task_name):
     for result in results:
         metrics = result['metrics']
         model_name = result['model_name']
+        dataset = result['dataset']
         
         csv_row = {
             'Model': model_name,
+            'Dataset': dataset,
             'Task': task_name,
             'Accuracy': f"{metrics['accuracy']:.4f}",
             'Legitimate_Precision': f"{metrics['legitimate_metrics']['precision']:.4f}",
@@ -539,6 +559,7 @@ def export_task2_fake_csv(results, output_file):
     for result in results:
         metrics = result['metrics']
         model_name = result['model_name']
+        dataset = result['dataset']
         subclass = result['task2_subclass']
         
         legitimate_metrics = metrics['legitimate_metrics']
@@ -548,6 +569,7 @@ def export_task2_fake_csv(results, output_file):
         target_class = subclass.replace('_fake', '').replace('_', '-').title()
         csv_row = {
             'Model': model_name,
+            'Dataset': dataset,
             'Subclass': target_class,
             'Accuracy': f"{metrics['accuracy']:.4f}",
             'Target_Class_Precision': f"{legitimate_metrics['precision']:.4f}",
@@ -573,6 +595,7 @@ def export_task2_legitimate_csv(results, output_file):
     for result in results:
         metrics = result['metrics']
         model_name = result['model_name']
+        dataset = result['dataset']
         subclass = result['task2_subclass']
         
         legitimate_metrics = metrics['legitimate_metrics']
@@ -581,6 +604,7 @@ def export_task2_legitimate_csv(results, output_file):
         # 对于legitimate子类：Style-based vs Integration-based
         csv_row = {
             'Model': model_name,
+            'Dataset': dataset,
             'Subclass': subclass,
             'Accuracy': f"{metrics['accuracy']:.4f}",
             'Style_Based_Precision': f"{legitimate_metrics['precision']:.4f}",
@@ -644,6 +668,7 @@ def print_prediction_analysis(analysis_results):
             metrics = result['metrics']
             print(f"\n📁 {result['file_path']}")
             print(f"   模型: {result['model_name']}")
+            print(f"   数据集: {result['dataset']}")
             print(f"   样本数: {metrics['total_samples']}")
             print(f"   总体准确率: {metrics['accuracy']:.4f} ({metrics['correct_predictions']}/{metrics['total_samples']})")
             
@@ -678,6 +703,7 @@ def print_prediction_analysis(analysis_results):
             metrics = result['metrics']
             print(f"\n📁 {result['file_path']}")
             print(f"   模型: {result['model_name']}")
+            print(f"   数据集: {result['dataset']}")
             print(f"   样本数: {metrics['total_samples']}")
             print(f"   总体准确率: {metrics['accuracy']:.4f} ({metrics['correct_predictions']}/{metrics['total_samples']})")
             
@@ -712,6 +738,7 @@ def print_prediction_analysis(analysis_results):
             metrics = result['metrics']
             print(f"\n📁 {result['file_path']}")
             print(f"   模型: {result['model_name']}")
+            print(f"   数据集: {result['dataset']}")
             print(f"   子类: {result['task2_subclass']}")
             print(f"   样本数: {metrics['total_samples']}")
             print(f"   总体准确率: {metrics['accuracy']:.4f} ({metrics['correct_predictions']}/{metrics['total_samples']})")
