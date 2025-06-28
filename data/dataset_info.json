@@ -14,6 +14,42 @@
   "task1_small_llama": {
     "file_name": "data_table/task1/small_8k/alpaca_megafake_llama_8k.json"
   },
+  "task1_full_cot_sc_glm": {
+    "file_name": "data_table/task1/alpaca_full_CoT_SC/cot_sc_megafake_glm_binary.json"
+  },
+  "task1_full_cot_sc_llama": {
+    "file_name": "data_table/task1/alpaca_full_CoT_SC/cot_sc_megafake_llama_binary.json"
+  },
+  "task1_full_fs_5_glm": {
+    "file_name": "data_table/task1/alpaca_full_FS_5/fs_5_megafake_glm_binary.json"
+  },
+  "task1_full_fs_5_llama": {
+    "file_name": "data_table/task1/alpaca_full_FS_5/fs_5_megafake_llama_binary.json"
+  },
+  "task1_full_zs_df_glm": {
+    "file_name": "data_table/task1/alpaca_full_ZS_DF/zs_df_megafake_glm_binary.json"
+  },
+  "task1_full_zs_df_llama": {
+    "file_name": "data_table/task1/alpaca_full_ZS_DF/zs_df_megafake_llama_binary.json"
+  },
+  "task1_test100_cot_sc_glm": {
+    "file_name": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_glm_binary.json"
+  },
+  "task1_test100_cot_sc_llama": {
+    "file_name": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_llama_binary.json"
+  },
+  "task1_test100_fs_5_glm": {
+    "file_name": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_glm_binary.json"
+  },
+  "task1_test100_fs_5_llama": {
+    "file_name": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_llama_binary.json"
+  },
+  "task1_test100_zs_df_glm": {
+    "file_name": "data_table/task1/alpaca_test100_ZS_DF/test100_zs_df_megafake_glm_binary.json"
+  },
+  "task1_test100_zs_df_llama": {
+    "file_name": "data_table/task1/alpaca_test100_ZS_DF/test100_zs_df_megafake_llama_binary.json"
+  },
   "task2_full_glm_content_based_fake": {
     "file_name": "data_table/task2/alpaca_full/glm/alpaca_glm_content_based_fake.json"
   },

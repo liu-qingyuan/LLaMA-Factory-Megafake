@@ -8,37 +8,53 @@ import datetime
 
 # 模型配置：模型路径 -> 模板名称
 MODEL_CONFIGS = {
-    # "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
-    # "/root/autodl-tmp/models/chatglm3-6b": "chatglm3", 
-    # "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": "llama3",
+    "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
+    "/root/autodl-tmp/models/chatglm3-6b": "chatglm3", 
+    "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": "llama3",
     "/root/autodl-tmp/models/Mistral-7B-Instruct-v0.1": "mistral",
-    # "/root/autodl-tmp/models/Qwen1.5-7B": "qwen"
+    "/root/autodl-tmp/models/Qwen1.5-7B": "qwen"
 }
 
 # 数据集配置
 DATASET_CONFIGS = {
-    "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
-    "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
+    # "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
+    # "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
     # "task1_small_glm": "data_table/task1/small_8k/alpaca_megafake_glm_8k.json",
     # "task1_small_llama": "data_table/task1/small_8k/alpaca_megafake_llama_8k.json",
     
+    # Task1 - 多种推理配置数据集 (完整版)
+    # "task1_full_cot_sc_glm": "data_table/task1/alpaca_full_CoT_SC/cot_sc_megafake_glm_binary.json",
+    # "task1_full_cot_sc_llama": "data_table/task1/alpaca_full_CoT_SC/cot_sc_megafake_llama_binary.json",
+    # "task1_full_fs_5_glm": "data_table/task1/alpaca_full_FS_5/fs_5_megafake_glm_binary.json",
+    # "task1_full_fs_5_llama": "data_table/task1/alpaca_full_FS_5/fs_5_megafake_llama_binary.json",
+    # "task1_full_zs_df_glm": "data_table/task1/alpaca_full_ZS_DF/zs_df_megafake_glm_binary.json",
+    # "task1_full_zs_df_llama": "data_table/task1/alpaca_full_ZS_DF/zs_df_megafake_llama_binary.json",
+    
+    # Task1 - 多种推理配置数据集 (测试版100条)
+    "task1_test100_cot_sc_glm": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_glm_binary.json",
+    "task1_test100_cot_sc_llama": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_llama_binary.json",
+    "task1_test100_fs_5_glm": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_glm_binary.json",
+    "task1_test100_fs_5_llama": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_llama_binary.json",
+    "task1_test100_zs_df_glm": "data_table/task1/alpaca_test100_ZS_DF/test100_zs_df_megafake_glm_binary.json",
+    "task1_test100_zs_df_llama": "data_table/task1/alpaca_test100_ZS_DF/test100_zs_df_megafake_llama_binary.json",
+    
     # Task2 - GLM 假新闻子类
-    "task2_full_glm_style_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_fake.json",
-    "task2_full_glm_content_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_content_based_fake.json",
-    "task2_full_glm_integration_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_integration_based_fake.json",
-    "task2_full_glm_story_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_story_based_fake.json",
+    # "task2_full_glm_style_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_fake.json",
+    # "task2_full_glm_content_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_content_based_fake.json",
+    # "task2_full_glm_integration_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_integration_based_fake.json",
+    # "task2_full_glm_story_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_story_based_fake.json",
     # Task2 - GLM 真新闻子类
-    "task2_full_glm_style_based_legitimate": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_legitimate.json",
-    "task2_full_glm_integration_based_legitimate": "data_table/task2/alpaca_full/glm/alpaca_glm_integration_based_legitimate.json",
+    # "task2_full_glm_style_based_legitimate": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_legitimate.json",
+    # "task2_full_glm_integration_based_legitimate": "data_table/task2/alpaca_full/glm/alpaca_glm_integration_based_legitimate.json",
     
     # Task2 - LLaMA 假新闻子类
-    "task2_full_llama_style_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_fake.json",
-    "task2_full_llama_content_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_content_based_fake.json",
-    "task2_full_llama_integration_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_integration_based_fake.json",
-    "task2_full_llama_story_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_story_based_fake.json",
+    # "task2_full_llama_style_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_fake.json",
+    # "task2_full_llama_content_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_content_based_fake.json",
+    # "task2_full_llama_integration_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_integration_based_fake.json",
+    # "task2_full_llama_story_based_fake": "data_table/task2/alpaca_full/llama/alpaca_llama3_story_based_fake.json",
     # Task2 - LLaMA 真新闻子类
-    "task2_full_llama_style_based_legitimate": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_legitimate.json",
-    "task2_full_llama_integration_based_legitimate": "data_table/task2/alpaca_full/llama/alpaca_llama3_integration_based_legitimate.json",
+    # "task2_full_llama_style_based_legitimate": "data_table/task2/alpaca_full/llama/alpaca_llama3_style_based_legitimate.json",
+    # "task2_full_llama_integration_based_legitimate": "data_table/task2/alpaca_full/llama/alpaca_llama3_integration_based_legitimate.json",
     
     # Task2 - 8K 采样数据集（注释掉以减少任务量，需要时可取消注释）
     # "task2_small_glm_style_based_fake": "data_table/task2/small_8k/glm/alpaca_glm_style_based_fake_8k.json",
@@ -71,15 +87,40 @@ def get_save_path(model_path, dataset_name):
     # 根据数据集名称确定任务和类型
     if "task1" in dataset_name:
         task = "task1"
+        
+        # 处理推理配置类型
+        if "cot_sc" in dataset_name:
+            reasoning_type = "CoT_SC"
+        elif "fs_5" in dataset_name:
+            reasoning_type = "FS_5"
+        elif "zs_df" in dataset_name:
+            reasoning_type = "ZS_DF"
+        else:
+            reasoning_type = None
+        
         if "full" in dataset_name:
             size = "full"
+        elif "test100" in dataset_name:
+            size = "test100"
         else:
             size = "small"
         
         if "glm" in dataset_name:
-            data_type = "megafake_glm_binary"
+            if reasoning_type:
+                if size == "test100":
+                    data_type = f"test100_{reasoning_type.lower()}_megafake_glm_binary"
+                else:
+                    data_type = f"{reasoning_type.lower()}_megafake_glm_binary"
+            else:
+                data_type = "megafake_glm_binary"
         else:
-            data_type = "megafake_llama_binary"
+            if reasoning_type:
+                if size == "test100":
+                    data_type = f"test100_{reasoning_type.lower()}_megafake_llama_binary"
+                else:
+                    data_type = f"{reasoning_type.lower()}_megafake_llama_binary"
+            else:
+                data_type = "megafake_llama_binary"
             
     elif "task2" in dataset_name:
         task = "task2"
@@ -137,8 +178,19 @@ def get_log_path(model_path, dataset_name):
     log_filename = f"inference_{model_name}_{dataset_name}_{timestamp}.log"
     return f"logs/{log_filename}"
 
-def run_inference(model_path, template, dataset_name, save_path, max_new_tokens=30):
+def run_inference(model_path, template, dataset_name, save_path, max_new_tokens=None):
     """运行单个推理任务"""
+    # 根据数据集类型设置合适的max_new_tokens
+    if max_new_tokens is None:
+        if "cot_sc" in dataset_name:
+            max_new_tokens = 512  # CoT-SC需要更长的输出
+        elif "zs_df" in dataset_name:
+            max_new_tokens = 256  # ZS-DF需要中等长度的输出
+        elif "fs_5" in dataset_name:
+            max_new_tokens = 128  # FS-5需要适中的输出
+        else:
+            max_new_tokens = 30   # 原始数据集的默认值
+    
     cmd = [
         "python", "scripts/vllm_infer.py",
         "--model_name_or_path", model_path,
