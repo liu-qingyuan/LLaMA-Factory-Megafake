@@ -382,7 +382,9 @@ def get_model_name_from_path(file_path):
     filename = os.path.basename(file_path)
     
     # 优先检查更具体的模型名称，注意顺序很重要！
-    if "Meta-Llama-3.1-8B-Instruct" in filename:
+    if "Mistral-7B-Instruct-v0.1" in filename:
+        return "Mistral-7B-Instruct-v0.1-LoRA"
+    elif "Meta-Llama-3.1-8B-Instruct" in filename:
         return "LLaMA3.1-8B-LoRA"
     elif "chatglm3-6b" in filename.lower():
         return "ChatGLM3-6B-LoRA"
