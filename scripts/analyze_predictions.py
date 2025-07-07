@@ -377,42 +377,48 @@ def calculate_multiclass_metrics(data, task2_subclass):
     }
 
 def get_model_name_from_path(file_path):
-    """从文件路径中提取模型名称"""
+    """从文件路径中提取LoRA模型名称"""
     # 从文件名中提取模型名称
     filename = os.path.basename(file_path)
     
-    # 注意：顺序很重要！先检查更具体的模型名称
-    if "Meta-Llama" in filename:
-        return "LLaMA3-8B"
-    elif "Qwen" in filename:
-        return "Qwen1.5-7B"
-    elif "Baichuan" in filename:
-        return "Baichuan2-7B"
-    elif "Mistral" in filename:
-        return "Mistral-7B"
+    # 优先检查更具体的模型名称，注意顺序很重要！
+    if "Mistral-7B-Instruct-v0.1" in filename:
+        return "Mistral-7B-Instruct-v0.1-LoRA"
+    elif "Meta-Llama-3.1-8B-Instruct" in filename:
+        return "LLaMA3.1-8B-LoRA"
     elif "chatglm3-6b" in filename.lower():
-        return "ChatGLM3-6B"
+        return "ChatGLM3-6B-LoRA"
+    elif "Qwen1.5-7B" in filename:
+        return "Qwen1.5-7B-LoRA"
+    elif "Meta-Llama" in filename:
+        return "LLaMA3-8B-LoRA"
+    elif "Qwen" in filename:
+        return "Qwen1.5-7B-LoRA"
+    elif "Baichuan" in filename:
+        return "Baichuan2-7B-LoRA"
+    elif "Mistral" in filename:
+        return "Mistral-7B-LoRA"
     elif "Llama" in filename or "LLaMA" in filename:
-        return "LLaMA3-8B"
+        return "LLaMA3-8B-LoRA"
     else:
-        return "Unknown"
+        return "Unknown-LoRA"
 
-def get_dataset_from_path(file_path):
-    """从文件路径中提取数据集信息（训练和推理使用同一个数据集）"""
+def get_task3_dataset_info(file_path):
+    """从Task3文件路径中提取数据集信息"""
     filename = os.path.basename(file_path)
     
-    # Task1和Task2的数据集识别
-    if "_glm_" in filename:
-        return "ChatGLM Dataset"
-    elif "_llama3_" in filename or "_llama_" in filename:
-        return "LLaMA Dataset"
-    # Task3使用的是特定数据集
-    elif "_gossip_" in filename:
-        return "GossipCop Dataset"
-    elif "_polifact_" in filename:
-        return "PolitiFact Dataset"
-    else:
-        return "Unknown"
+    if "trained_on_polifact" in filename:
+        if "gossip" in filename:
+            return "Gossip (Trained on PolitiFact)"
+        elif "polifact" in filename:
+            return "PolitiFact (Trained on PolitiFact)"
+    elif "trained_on_gossip" in filename:
+        if "polifact" in filename:
+            return "PolitiFact (Trained on Gossip)"
+        elif "gossip" in filename:
+            return "Gossip (Trained on Gossip)"
+    
+    return "Unknown Dataset"
 
 def analyze_predictions(file_path):
     """分析单个文件的预测结果"""
@@ -453,7 +459,6 @@ def analyze_predictions(file_path):
     result = {
         'file_path': file_path,
         'model_name': get_model_name_from_path(file_path),
-        'dataset': get_dataset_from_path(file_path),
         'task_type': task_type,
         'task2_subclass': task2_subclass,
         'total_samples': len(data),
@@ -464,9 +469,13 @@ def analyze_predictions(file_path):
         'metrics': metrics
     }
     
+    # 为Task3添加数据集信息
+    if "task3" in file_path:
+        result['dataset_info'] = get_task3_dataset_info(file_path)
+    
     return result
 
-def export_to_csv(analysis_results, output_file="prediction_analysis_results.csv"):
+def export_to_csv(analysis_results, output_file="prediction_analysis_results_lora.csv"):
     """导出结果到CSV文件"""
     # 按任务类型分组
     task1_results = []
@@ -483,14 +492,14 @@ def export_to_csv(analysis_results, output_file="prediction_analysis_results.csv
             elif 'task3' in file_path:
                 task3_results.append(result)
     
-    # 创建三个CSV文件
+    # 创建CSV文件
     base_name = output_file.replace('.csv', '')
     
     # Task1 CSV
     if task1_results:
-        task1_csv = f"{base_name}_Task1.csv"
+        task1_csv = f"{base_name}_Task1_lora.csv"
         export_binary_task_csv(task1_results, task1_csv, "Task1")
-        print(f"📄 Task1 结果已导出到: {task1_csv}")
+        print(f"📄 Task1 LoRA结果已导出到: {task1_csv}")
     
     # Task2 CSV - 按子类分别导出
     if task2_results:
@@ -506,21 +515,21 @@ def export_to_csv(analysis_results, output_file="prediction_analysis_results.csv
         
         # 导出fake子类
         if fake_results:
-            task2_fake_csv = f"{base_name}_Task2_Fake.csv"
+            task2_fake_csv = f"{base_name}_Task2_Fake_lora.csv"
             export_task2_fake_csv(fake_results, task2_fake_csv)
-            print(f"📄 Task2 Fake 结果已导出到: {task2_fake_csv}")
+            print(f"📄 Task2 Fake LoRA结果已导出到: {task2_fake_csv}")
         
         # 导出legitimate子类
         if legitimate_results:
-            task2_legitimate_csv = f"{base_name}_Task2_Legitimate.csv"
+            task2_legitimate_csv = f"{base_name}_Task2_Legitimate_lora.csv"
             export_task2_legitimate_csv(legitimate_results, task2_legitimate_csv)
-            print(f"📄 Task2 Legitimate 结果已导出到: {task2_legitimate_csv}")
+            print(f"📄 Task2 Legitimate LoRA结果已导出到: {task2_legitimate_csv}")
     
     # Task3 CSV
     if task3_results:
-        task3_csv = f"{base_name}_Task3.csv"
-        export_binary_task_csv(task3_results, task3_csv, "Task3")
-        print(f"📄 Task3 结果已导出到: {task3_csv}")
+        task3_csv = f"{base_name}_Task3_lora.csv"
+        export_task3_csv(task3_results, task3_csv)
+        print(f"📄 Task3 LoRA结果已导出到: {task3_csv}")
 
 def export_binary_task_csv(results, output_file, task_name):
     """导出二分类任务的CSV"""
@@ -529,11 +538,9 @@ def export_binary_task_csv(results, output_file, task_name):
     for result in results:
         metrics = result['metrics']
         model_name = result['model_name']
-        dataset = result['dataset']
         
         csv_row = {
             'Model': model_name,
-            'Dataset': dataset,
             'Task': task_name,
             'Accuracy': f"{metrics['accuracy']:.4f}",
             'Legitimate_Precision': f"{metrics['legitimate_metrics']['precision']:.4f}",
@@ -546,6 +553,40 @@ def export_binary_task_csv(results, output_file, task_name):
         csv_data.append(csv_row)
     
     if csv_data:
+        # 确保输出目录存在
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        fieldnames = csv_data[0].keys()
+        with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(csv_data)
+
+def export_task3_csv(results, output_file):
+    """导出Task3的CSV，包含数据集信息"""
+    csv_data = []
+    
+    for result in results:
+        metrics = result['metrics']
+        model_name = result['model_name']
+        dataset_info = result.get('dataset_info', 'Unknown')
+        
+        csv_row = {
+            'Model': model_name,
+            'Dataset': dataset_info,
+            'Task': 'Task3',
+            'Accuracy': f"{metrics['accuracy']:.4f}",
+            'Legitimate_Precision': f"{metrics['legitimate_metrics']['precision']:.4f}",
+            'Legitimate_Recall': f"{metrics['legitimate_metrics']['recall']:.4f}",
+            'Legitimate_F1_Score': f"{metrics['legitimate_metrics']['f1_score']:.4f}",
+            'Fake_Precision': f"{metrics['fake_metrics']['precision']:.4f}",
+            'Fake_Recall': f"{metrics['fake_metrics']['recall']:.4f}",
+            'Fake_F1_Score': f"{metrics['fake_metrics']['f1_score']:.4f}",
+        }
+        csv_data.append(csv_row)
+    
+    if csv_data:
+        # 确保输出目录存在
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         fieldnames = csv_data[0].keys()
         with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -559,7 +600,6 @@ def export_task2_fake_csv(results, output_file):
     for result in results:
         metrics = result['metrics']
         model_name = result['model_name']
-        dataset = result['dataset']
         subclass = result['task2_subclass']
         
         legitimate_metrics = metrics['legitimate_metrics']
@@ -569,7 +609,6 @@ def export_task2_fake_csv(results, output_file):
         target_class = subclass.replace('_fake', '').replace('_', '-').title()
         csv_row = {
             'Model': model_name,
-            'Dataset': dataset,
             'Subclass': target_class,
             'Accuracy': f"{metrics['accuracy']:.4f}",
             'Target_Class_Precision': f"{legitimate_metrics['precision']:.4f}",
@@ -582,6 +621,8 @@ def export_task2_fake_csv(results, output_file):
         csv_data.append(csv_row)
     
     if csv_data:
+        # 确保输出目录存在
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         fieldnames = csv_data[0].keys()
         with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -595,7 +636,6 @@ def export_task2_legitimate_csv(results, output_file):
     for result in results:
         metrics = result['metrics']
         model_name = result['model_name']
-        dataset = result['dataset']
         subclass = result['task2_subclass']
         
         legitimate_metrics = metrics['legitimate_metrics']
@@ -604,7 +644,6 @@ def export_task2_legitimate_csv(results, output_file):
         # 对于legitimate子类：Style-based vs Integration-based
         csv_row = {
             'Model': model_name,
-            'Dataset': dataset,
             'Subclass': subclass,
             'Accuracy': f"{metrics['accuracy']:.4f}",
             'Style_Based_Precision': f"{legitimate_metrics['precision']:.4f}",
@@ -617,31 +656,41 @@ def export_task2_legitimate_csv(results, output_file):
         csv_data.append(csv_row)
     
     if csv_data:
+        # 确保输出目录存在
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         fieldnames = csv_data[0].keys()
         with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(csv_data)
 
-def find_result_files(base_dir="megafakeTasks"):
-    """查找所有结果文件"""
+def find_lora_result_files(base_dir="megafakeTasks"):
+    """查找所有LoRA结果文件"""
     result_files = []
     
     if not os.path.exists(base_dir):
         print(f"❌ 目录不存在: {base_dir}")
         return result_files
     
-    for root, dirs, files in os.walk(base_dir):
-        for file in files:
-            if file.endswith('.jsonl'):
-                result_files.append(os.path.join(root, file))
+    # 只查找task1和task3的LoRA文件
+    target_patterns = [
+        "**/task1/full/*LoRA*.jsonl",
+        "**/task3/full/*LoRA*.jsonl"
+    ]
+    
+    from pathlib import Path
+    base_path = Path(base_dir)
+    
+    for pattern in target_patterns:
+        for file_path in base_path.glob(pattern):
+            result_files.append(str(file_path))
     
     return sorted(result_files)
 
 def print_prediction_analysis(analysis_results):
     """打印预测分析结果"""
     print("\n" + "="*80)
-    print("🎯 模型预测结果统计分析")
+    print("🎯 LoRA模型预测结果统计分析")
     print("="*80)
     
     # 按任务类型分组
@@ -661,14 +710,13 @@ def print_prediction_analysis(analysis_results):
     
     # 打印Task1结果
     if task1_results:
-        print(f"\n📈 Task1 (二分类任务) - {len(task1_results)} 个文件:")
+        print(f"\n📈 Task1 (二分类任务) - {len(task1_results)} 个LoRA模型:")
         total_accuracy = 0
         
         for result in task1_results:
             metrics = result['metrics']
             print(f"\n📁 {result['file_path']}")
             print(f"   模型: {result['model_name']}")
-            print(f"   数据集: {result['dataset']}")
             print(f"   样本数: {metrics['total_samples']}")
             print(f"   总体准确率: {metrics['accuracy']:.4f} ({metrics['correct_predictions']}/{metrics['total_samples']})")
             
@@ -692,18 +740,19 @@ def print_prediction_analysis(analysis_results):
         
         if len(task1_results) > 1:
             avg_accuracy = total_accuracy / len(task1_results)
-            print(f"\n🎯 Task1 平均准确率: {avg_accuracy:.4f}")
+            print(f"\n🎯 Task1 LoRA模型平均准确率: {avg_accuracy:.4f}")
     
     # 打印Task3结果
     if task3_results:
-        print(f"\n📈 Task3 (二分类任务) - {len(task3_results)} 个文件:")
+        print(f"\n📈 Task3 (二分类任务) - {len(task3_results)} 个LoRA模型:")
         total_accuracy = 0
         
         for result in task3_results:
             metrics = result['metrics']
+            dataset_info = result.get('dataset_info', 'Unknown')
             print(f"\n📁 {result['file_path']}")
             print(f"   模型: {result['model_name']}")
-            print(f"   数据集: {result['dataset']}")
+            print(f"   数据集: {dataset_info}")
             print(f"   样本数: {metrics['total_samples']}")
             print(f"   总体准确率: {metrics['accuracy']:.4f} ({metrics['correct_predictions']}/{metrics['total_samples']})")
             
@@ -727,18 +776,17 @@ def print_prediction_analysis(analysis_results):
         
         if len(task3_results) > 1:
             avg_accuracy = total_accuracy / len(task3_results)
-            print(f"\n🎯 Task3 平均准确率: {avg_accuracy:.4f}")
+            print(f"\n🎯 Task3 LoRA模型平均准确率: {avg_accuracy:.4f}")
     
-    # 打印Task2结果
+    # 打印Task2结果（如果有的话）
     if task2_results:
-        print(f"\n📈 Task2 (二分类任务) - {len(task2_results)} 个文件:")
+        print(f"\n📈 Task2 (二分类任务) - {len(task2_results)} 个LoRA模型:")
         total_accuracy = 0
         
         for result in task2_results:
             metrics = result['metrics']
             print(f"\n📁 {result['file_path']}")
             print(f"   模型: {result['model_name']}")
-            print(f"   数据集: {result['dataset']}")
             print(f"   子类: {result['task2_subclass']}")
             print(f"   样本数: {metrics['total_samples']}")
             print(f"   总体准确率: {metrics['accuracy']:.4f} ({metrics['correct_predictions']}/{metrics['total_samples']})")
@@ -774,18 +822,18 @@ def print_prediction_analysis(analysis_results):
         
         if len(task2_results) > 1:
             avg_accuracy = total_accuracy / len(task2_results)
-            print(f"\n🎯 Task2 平均准确率: {avg_accuracy:.4f}")
+            print(f"\n🎯 Task2 LoRA模型平均准确率: {avg_accuracy:.4f}")
 
 def main():
-    parser = argparse.ArgumentParser(description='分析模型预测结果')
+    parser = argparse.ArgumentParser(description='分析LoRA模型预测结果')
     parser.add_argument('--dir', default='megafakeTasks', help='结果文件目录')
     parser.add_argument('--file', help='指定单个文件进行分析')
-    parser.add_argument('--output', default='megafakeTasks/results/prediction_analysis_results_base_models.csv', help='CSV输出文件名')
+    parser.add_argument('--output', default='megafakeTasks/results/prediction_analysis_results_lora_models.csv', help='CSV输出文件名')
     parser.add_argument('--no-csv', action='store_true', help='不导出CSV文件')
     
     args = parser.parse_args()
     
-    print("🚀 开始分析模型预测结果")
+    print("🚀 开始分析LoRA模型预测结果")
     
     analysis_results = []
     
@@ -799,14 +847,14 @@ def main():
             print(f"❌ 文件不存在: {args.file}")
             return
     else:
-        # 查找并分析所有文件
-        result_files = find_result_files(args.dir)
+        # 查找并分析所有LoRA文件
+        result_files = find_lora_result_files(args.dir)
         
         if not result_files:
-            print(f"❌ 在目录 {args.dir} 中没有找到任何 .jsonl 文件")
+            print(f"❌ 在目录 {args.dir} 中没有找到任何 LoRA .jsonl 文件")
             return
         
-        print(f"📁 找到 {len(result_files)} 个结果文件")
+        print(f"📁 找到 {len(result_files)} 个LoRA结果文件")
         
         for file_path in result_files:
             result = analyze_predictions(file_path)
@@ -820,7 +868,7 @@ def main():
     if not args.no_csv:
         export_to_csv(analysis_results, args.output)
     
-    print(f"\n✅ 分析完成！")
+    print(f"\n✅ LoRA模型分析完成！")
 
 if __name__ == "__main__":
     main() 
