@@ -106,7 +106,9 @@ legitimate"""
     return len(alpaca_data)
 
 def main():
-    base_dir = Path("/root/autodl-tmp/LLaMA-Factory-Megafake2/data")
+    # 获取脚本所在目录，然后找到data目录
+    script_dir = Path(__file__).parent
+    base_dir = script_dir / "data"
     
     # Task 1 FS-5 转换
     print("=== 开始转换 Task 1 到 FS-5 格式 ===")
