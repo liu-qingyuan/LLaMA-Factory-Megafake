@@ -8,6 +8,13 @@ from collections import Counter, defaultdict
 from pathlib import Path
 import argparse
 
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    HAS_PLOTTING = True
+except ImportError:
+    HAS_PLOTTING = False
+
 def load_jsonl(file_path):
     """加载JSONL文件"""
     data = []
@@ -477,6 +484,7 @@ def analyze_predictions(file_path):
 
 def export_to_csv(analysis_results, output_file="prediction_analysis_results_lora.csv"):
     """导出结果到CSV文件"""
+    generated_files = []
     # 按任务类型分组
     task1_results = []
     task2_results = []
@@ -499,7 +507,8 @@ def export_to_csv(analysis_results, output_file="prediction_analysis_results_lor
     if task1_results:
         task1_csv = f"{base_name}_Task1_lora.csv"
         export_binary_task_csv(task1_results, task1_csv, "Task1")
-        print(f"📄 Task1 LoRA结果已导出到: {task1_csv}")
+        generated_files.append(task1_csv)
+        print(f"📄 Task1 LoRA结果已导出到: {Path(task1_csv).resolve()}")
     
     # Task2 CSV - 按子类分别导出
     if task2_results:
@@ -517,19 +526,24 @@ def export_to_csv(analysis_results, output_file="prediction_analysis_results_lor
         if fake_results:
             task2_fake_csv = f"{base_name}_Task2_Fake_lora.csv"
             export_task2_fake_csv(fake_results, task2_fake_csv)
-            print(f"📄 Task2 Fake LoRA结果已导出到: {task2_fake_csv}")
+            generated_files.append(task2_fake_csv)
+            print(f"📄 Task2 Fake LoRA结果已导出到: {Path(task2_fake_csv).resolve()}")
         
         # 导出legitimate子类
         if legitimate_results:
             task2_legitimate_csv = f"{base_name}_Task2_Legitimate_lora.csv"
             export_task2_legitimate_csv(legitimate_results, task2_legitimate_csv)
-            print(f"📄 Task2 Legitimate LoRA结果已导出到: {task2_legitimate_csv}")
+            generated_files.append(task2_legitimate_csv)
+            print(f"📄 Task2 Legitimate LoRA结果已导出到: {Path(task2_legitimate_csv).resolve()}")
     
     # Task3 CSV
     if task3_results:
         task3_csv = f"{base_name}_Task3_lora.csv"
         export_task3_csv(task3_results, task3_csv)
-        print(f"📄 Task3 LoRA结果已导出到: {task3_csv}")
+        generated_files.append(task3_csv)
+        print(f"📄 Task3 LoRA结果已导出到: {Path(task3_csv).resolve()}")
+    
+    return generated_files
 
 def export_binary_task_csv(results, output_file, task_name):
     """导出二分类任务的CSV"""
@@ -664,7 +678,128 @@ def export_task2_legitimate_csv(results, output_file):
             writer.writeheader()
             writer.writerows(csv_data)
 
-def find_lora_result_files(base_dir="megafakeTasks"):
+def plot_results(analysis_results, output_dir):
+    """生成可视化图表"""
+    if not HAS_PLOTTING:
+        print("⚠️  Plotting skipped: matplotlib or seaborn not installed.")
+        return []
+    
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        
+    plot_files = []
+    
+    # 准备数据 (Task 1 Binary)
+    task1_data = []
+    for res in analysis_results:
+        if res and "task1" in res['file_path'] and 'metrics' in res:
+            m = res['metrics']
+            if 'accuracy' not in m: continue
+            model = res['model_name']
+            task1_data.append({
+                'Model': model,
+                'Accuracy': m['accuracy'],
+                'Legitimate F1': m['legitimate_metrics']['f1_score'],
+                'Fake F1': m['fake_metrics']['f1_score'],
+                'Legitimate Recall': m['legitimate_metrics']['recall'],
+                'Fake Recall': m['fake_metrics']['recall']
+            })
+            
+    if not task1_data:
+        print("⚠️  No Task 1 data found for plotting.")
+        return []
+
+    # 1. Accuracy Comparison (Bar Chart)
+    try:
+        plt.figure(figsize=(10, 6))
+        sns.set_theme(style="whitegrid")
+        models = [d['Model'] for d in task1_data]
+        accuracies = [d['Accuracy'] for d in task1_data]
+        
+        # Sort by accuracy descending
+        sorted_indices = sorted(range(len(accuracies)), key=lambda k: accuracies[k], reverse=True)
+        models = [models[i] for i in sorted_indices]
+        accuracies = [accuracies[i] for i in sorted_indices]
+        
+        ax = sns.barplot(x=models, y=accuracies, hue=models, palette="viridis", legend=False)
+        plt.title('Model Accuracy Comparison (Task 1)', fontsize=15)
+        plt.ylabel('Accuracy', fontsize=12)
+        plt.xlabel('Model', fontsize=12)
+        plt.ylim(0, 1.05)
+        plt.xticks(rotation=45)
+        
+        # Add values on top of bars
+        for i, v in enumerate(accuracies):
+            ax.text(i, v + 0.01, f"{v:.4f}", ha='center', va='bottom')
+            
+        plt.tight_layout()
+        acc_path = os.path.join(output_dir, 'accuracy_comparison.png')
+        plt.savefig(acc_path, dpi=300)
+        plt.close()
+        plot_files.append(acc_path)
+        
+        # 2. F1 Score Grouped Bar Chart
+        plt.figure(figsize=(12, 6))
+        x = range(len(models))
+        width = 0.35
+        
+        # Re-sort data based on previous model sort
+        leg_f1 = [next(d['Legitimate F1'] for d in task1_data if d['Model'] == m) for m in models]
+        fake_f1 = [next(d['Fake F1'] for d in task1_data if d['Model'] == m) for m in models]
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        rects1 = ax.bar([i - width/2 for i in x], leg_f1, width, label='Legitimate', color='skyblue')
+        rects2 = ax.bar([i + width/2 for i in x], fake_f1, width, label='Fake', color='salmon')
+        
+        ax.set_ylabel('F1 Score')
+        ax.set_title('F1 Score by Class and Model')
+        ax.set_xticks(x)
+        ax.set_xticklabels(models, rotation=45)
+        ax.legend()
+        ax.set_ylim(0, 1.05)
+        
+        plt.tight_layout()
+        f1_path = os.path.join(output_dir, 'f1_score_comparison.png')
+        plt.savefig(f1_path, dpi=300)
+        plt.close()
+        plot_files.append(f1_path)
+        
+        # 3. Precision vs Recall Scatter Plot
+        plt.figure(figsize=(10, 8))
+        
+        # Extract recalls and calculate precision (derived or stored? stored)
+        # We need to iterate again or store in task1_data
+        
+        colors = sns.color_palette("husl", len(task1_data))
+        
+        for i, d in enumerate(task1_data):
+            # Legitimate point
+            plt.scatter(d['Legitimate Recall'], d.get('Legitimate Precision', 0), 
+                        color=colors[i], marker='o', s=100, label=f"{d['Model']} (Leg)")
+            # Fake point
+            plt.scatter(d['Fake Recall'], d.get('Fake Precision', 0), 
+                        color=colors[i], marker='^', s=100, label=f"{d['Model']} (Fake)")
+            
+        plt.title('Precision vs Recall (Task 1)')
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.xlim(0, 1.05)
+        plt.ylim(0, 1.05)
+        plt.grid(True)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        
+        scatter_path = os.path.join(output_dir, 'precision_recall_scatter.png')
+        plt.savefig(scatter_path, dpi=300)
+        plt.close()
+        plot_files.append(scatter_path)
+        
+    except Exception as e:
+        print(f"❌ Plotting failed: {e}")
+        
+    return plot_files
+
+def find_lora_result_files(base_dir="sensitivity_analysis/outputs"):
     """查找所有LoRA结果文件"""
     result_files = []
     
@@ -675,7 +810,10 @@ def find_lora_result_files(base_dir="megafakeTasks"):
     # 只查找task1和task3的LoRA文件
     target_patterns = [
         "**/task1/full/*LoRA*.jsonl",
-        "**/task3/full/*LoRA*.jsonl"
+        "**/task3/full/*LoRA*.jsonl",
+        "**/task1/test200_balanced/*LoRA*.jsonl",
+        "**/task1/test100/*LoRA*.jsonl",
+        "**/task1/scale_*/*LoRA*.jsonl"
     ]
     
     from pathlib import Path
@@ -826,10 +964,12 @@ def print_prediction_analysis(analysis_results):
 
 def main():
     parser = argparse.ArgumentParser(description='分析LoRA模型预测结果')
-    parser.add_argument('--dir', default='megafakeTasks', help='结果文件目录')
+    parser.add_argument('--dir', default='sensitivity_analysis/outputs', help='结果文件目录')
     parser.add_argument('--file', help='指定单个文件进行分析')
-    parser.add_argument('--output', default='megafakeTasks/results/prediction_analysis_results_lora_models.csv', help='CSV输出文件名')
+    parser.add_argument('--output', default='sensitivity_analysis/results/prediction_analysis_results_lora_models.csv', help='CSV输出文件名')
     parser.add_argument('--no-csv', action='store_true', help='不导出CSV文件')
+    parser.add_argument('--plot', action='store_true', help='生成可视化图表')
+    parser.add_argument('--plot-dir', default='sensitivity_analysis/results/plots', help='图表输出目录')
     
     args = parser.parse_args()
     
@@ -864,11 +1004,31 @@ def main():
     # 打印分析结果
     print_prediction_analysis(analysis_results)
     
-    # 导出CSV文件
+    generated_files = []
     if not args.no_csv:
-        export_to_csv(analysis_results, args.output)
+        generated_files = export_to_csv(analysis_results, args.output)
+    
+    if args.plot:
+        print(f"\n📊 正在生成图表到 {args.plot_dir} ...")
+        plot_files = plot_results(analysis_results, args.plot_dir)
+        for p in plot_files:
+            print(f"  📈 已生成: {Path(p).resolve()}")
     
     print(f"\n✅ LoRA模型分析完成！")
+    if generated_files:
+        print("\n📁 导出文件:")
+        for path in generated_files:
+            print(f"  - {Path(path).resolve()}")
+    
+    if args.plot:
+        print("\n🖼️  图表已生成，请检查 plot-dir。")
+        
+    recommend_cmd = (
+        f"python sensitivity_analysis/test_visualization.py --csv {Path(generated_files[0]).resolve()}"
+        if generated_files else
+        "python sensitivity_analysis/test_visualization.py --help"
+    )
+    print(f"🔜 推荐下一步: {recommend_cmd}")
 
 if __name__ == "__main__":
     main() 

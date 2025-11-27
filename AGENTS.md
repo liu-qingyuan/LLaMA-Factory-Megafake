@@ -1,34 +1,19 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/` hosts the core LLaMA-Factory codebase (training, inference, evaluation utilities).
-- `sensitivity_analysis/` contains configs, scripts, docs, and results specific to the MegaFake sensitivity workflows; logs land in `logs/sensitivity_analysis/`, while adapters and eval JSONL files are under `megafakeTasks/sensitivity_analysis/`.
-- `scripts/` exposes entrypoints such as `scripts/sa.py` (recommended CLI wrapper) alongside helper converters.
-- `tests/` provides unit and integration coverage; docs and product specs live in `docs/`.
-- Experiments archived in `experiments/` are legacy; reference them only for historical metrics.
+Core training and inference live in `src/` with reusable CLIs under `scripts/`. All sensitivity-analysis assets (docs, configs, smoke tests, plots) are now anchored in `sensitivity_analysis/`, which also hosts canonical `logs/`, `outputs/`, and `results/`. Old entry points are only in the archive. Legacy long-form adapters remain under `megafakeTasks/<task>/<dataset>/<model>/lora/sft`; keep them readable but route new jobs to `sensitivity_analysis/outputs` and symlink as needed. Dataset conversion helpers (`convert_task1.py`, `convert_task2.py`, `convert_task3.py`) and sampling scripts (e.g., `sample_test100_multi_reasoning_task1.py`) sit at the repo root for easy reuse. Tests mirror the source hierarchy inside `tests/`.
 
 ## Build, Test, and Development Commands
-- `pip install -e ".[torch,metrics]" --no-build-isolation` installs editable deps; add `,deepspeed,vllm,quantization` for full GPU feature parity.
-- `python scripts/sa.py quick` runs a lightweight end-to-end sensitivity sweep; replace `quick` with `full` or `test` for other modes.
-- `make build` publishes wheel/sdist via `python -m build`.
-- `make quality` performs `ruff check` and `ruff format --check` across `scripts`, `src`, and `tests`.
-- `make test` executes `pytest -vv tests/` with `CUDA_VISIBLE_DEVICES` unset (defaults to CPU) and `WANDB_DISABLED=true`.
+Install deps via `pip install -e ".[torch,metrics]" --no-build-isolation`; add `,deepspeed,vllm,quantization` when GPU kernels are required. Run `make quality` for `ruff format --check` + `ruff check`, and `make test` (PyTest) before submitting patches. Sensitivity flows typically call `python scripts/multi_model_lora_train.py --models Meta-Llama-3.1-8B-Instruct --datasets task1_test200_balanced_glm` followed by `python scripts/multi_model_lora_inference.py ...` and `python scripts/analyze_predictions.py --input sensitivity_analysis/outputs/...`. Always append `--dry-run` during wiring changes to confirm directories and configs.
 
 ## Coding Style & Naming Conventions
-- Follow standard PEP8 with 4-space indents; type hints are expected for new Python modules.
-- Use descriptive module and directory names (e.g., `data_sensitivity_analyzer.py`), and prefer snake_case for files/functions, PascalCase for classes.
-- Before committing, run `make style` (auto-fix via `ruff check --fix` plus `ruff format`); no trailing whitespace or mixed encodings.
+Use 4-space indentation, type hints, and snake_case for functions/variables (classes stay PascalCase). Dataset keys, result folders, and log prefixes follow `<task>_<size>_<variant>` (e.g., `task1_test200_balanced_glm`). Keep logging explicit: emit absolute `logs/` + `outputs/` paths and the next recommended command. Format code with `ruff format` and lint with `ruff check --fix` prior to committing to avoid CI churn.
 
 ## Testing Guidelines
-- Tests live in `tests/` and should mirror source structure (`tests/sensitivity_analysis/test_core.py`, etc.).
-- Name test functions with `test_...` and keep fixtures reusable.
-- Target meaningful coverage for new logic; for GPU-heavy flows, provide minimal-sample smoke tests callable via `scripts/sa.py test`.
+Favor “mini” datasets for validation: regenerate with `python sample_test100_multi_reasoning_task1.py` and run the upcoming `python scripts/sa.py quick --dry-run` to verify GPU/dataset/output readiness before long experiments. Unit and regression tests belong in `tests/` near the code they cover (e.g., `tests/scripts/test_multi_model_lora_train.py`) and should be named `test_<intent>`. When adding analyzers, include fixtures under `sensitivity_analysis/data/` so metrics pipelines can run deterministically.
 
 ## Commit & Pull Request Guidelines
-- Recent history favors concise, descriptive Chinese commit titles (e.g., `更新 multi_model_inference.py 文件...`); keep tense imperative and explain the primary change.
-- Include context about impacted modules/paths; multi-file work should mention both code and data updates.
-- PRs should describe motivation, summarize testing (`make test`, `python scripts/sa.py quick`), and link issues or experiment artefacts; attach logs or screenshots when modifying training flows.
+Commits use concise Chinese imperatives (`统一 output_dir 提示`, `修复 Baichuan2 推理配置`). PR descriptions must outline motivation, affected modules/configs, validation commands (train/infer/analyze), and where artifacts landed (`sensitivity_analysis/logs/train/...`). Attach representative logs or CSVs whenever metrics change, and cross-reference relevant PRD TODO items so reviewers can trace progress quickly.
 
 ## Security & Configuration Tips
-- Store large checkpoints under `/root/autodl-tmp/models` and avoid committing binaries; reference them via config rather than copying into the repo.
-- Set `HF_ENDPOINT` before running scripts in restricted environments, and keep API keys in `.env` entries ignored by Git.
+Honor the shared HF cache by leaving `HF_HOME=.cache/huggingface` in place and prefer `HF_ENDPOINT=https://hf-mirror.com`. Keep `trust_remote_code` explicit per model, especially when adding new entries to `MODEL_CONFIGS`. Before running Baichuan/Mistral/Qwen variants, confirm weights exist under `/root/autodl-tmp/models/` and that adapters are written to `sensitivity_analysis/outputs` rather than ad-hoc folders.

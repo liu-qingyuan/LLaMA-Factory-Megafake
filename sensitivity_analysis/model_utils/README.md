@@ -82,8 +82,12 @@ llamafactory-cli train scripts/model_utils/configs/test_baichuan_config.yaml
 # 在运行敏感性分析前验证模型
 python scripts/model_utils/verification/verify_all_models.py
 
-# 运行敏感性分析
-python scripts/run_sensitivity_analysis.py --all
+# 运行敏感性分析（推荐先跑 dry-run，再遵循 multi_model_* → analyze 流程）
+python scripts/multi_model_lora_train.py --dry-run --datasets task1_test200_balanced_glm
+python scripts/multi_model_lora_inference.py --dry-run --datasets task1_test200_balanced_glm
+python scripts/analyze_predictions.py --input sensitivity_analysis/outputs/task1/task1_test200_balanced_glm
+
+> 历史脚本 `scripts/run_sensitivity_analysis.py` 已移至 `sensitivity_analysis/scripts/archive/` 仅供参考，缺失的 `ExperimentManager` 模块尚未恢复。
 ```
 
 ### 自定义模型配置
@@ -107,7 +111,8 @@ python scripts/model_utils/verification/final_model_verification.py --model_path
 python scripts/model_utils/testing/test_model_with_llamafactory.py --model_path /path/to/new/model
 
 # 4. 运行敏感性分析
-python scripts/run_sensitivity_analysis.py --data-sensitivity
+python scripts/run_analysis.py --mode quick --type all
+# 或遵循 multi_model_* → analyze 流程
 ```
 
 ### 2. 模型问题诊断

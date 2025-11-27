@@ -47,7 +47,7 @@ sensitivity_analysis/                    # 敏感性分析主目录
 │   ├── original_sensitivity_analysis.py  # 原始分析脚本 (已修复导入)
 │   ├── quick_test.py                  # 快速测试脚本
 │   ├── monitor.py                     # 系统监控工具
-│   └── test_vllm_fix.py               # VLLM修复测试脚本
+│   └── archive/                       # 历史 ExperimentManager 流水线（仅供参考）
 ├── model_utils/                       # 模型工具
 │   └── verify_models.py               # 模型验证工具
 ├── utils/                             # 工具函数 (统一导入)
@@ -57,11 +57,15 @@ sensitivity_analysis/                    # 敏感性分析主目录
 │   ├── SETUP.md                       # 环境设置指南
 │   └── TROUBLESHOOTING.md             # 问题排查指南
 ├── data/                              # 数据目录
-├── results/                           # 结果输出
-└── logs/                              # 日志文件
+├── outputs/              # LoRA/推理产物（对外统一 root，megafakeTasks 通过符号链接指向这里）
+├── results/              # 结果输出（logs, outputs, results 统一根目录）
+├── logs/                 # 日志文件
+└── experiments/archive/  # 旧 ExperimentManager 产物（只读）
 
 scripts/                               # 🚀 简化入口脚本
 └── sa.py                              # 超简洁统一入口 (test|quick|full|monitor|verify)
+
+> ⚠️ `scripts/run_sensitivity_analysis.py` 及依赖的 ExperimentManager 模块缺失，现已归档到 `sensitivity_analysis/scripts/archive/`（历史样例，仅供参考）。请改用 `scripts/multi_model_*` + `analyze_predictions*.py` 或 `scripts/sa.py`。
 ```
 
 ## 🔧 环境设置

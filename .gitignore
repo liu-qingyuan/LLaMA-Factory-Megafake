@@ -178,6 +178,10 @@ swanlog/
 
 /logs
 /megafakeTasks
+sensitivity_analysis/logs/
+sensitivity_analysis/outputs/
+sensitivity_analysis/results/*.csv
+sensitivity_analysis/results/logs/
 generated_predictions.jsonl
 predictions_score.json
 download_models.sh

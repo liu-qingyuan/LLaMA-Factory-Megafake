@@ -8,13 +8,34 @@
 sensitivity_analysis/
 ├── scripts/              # 核心脚本
 │   ├── run_analysis.py   # 主入口脚本（推荐使用）
-│   ├── core.py          # 核心分析逻辑
-│   └── monitor.py       # 系统监控工具
-├── configs/             # 配置文件
-├── data/               # 数据文件
-├── results/            # 结果输出
-└── logs/               # 日志文件
+│   ├── core.py           # 核心分析逻辑
+│   ├── monitor.py        # 系统监控工具
+│   └── archive/          # 历史脚本（run_sensitivity_analysis 等，仅供参考）
+├── configs/              # 配置文件
+├── data/                 # 数据文件
+├── outputs/              # LoRA/推理产物（对外统一 root，megafakeTasks 通过符号链接指向这里）
+├── results/              # 结构化结果与可视化（非 CSV 资产才纳入版本控制）
+├── logs/                 # 训练/推理/分析日志
+└── experiments/archive/  # 旧 ExperimentManager 产物（只读，旧入口仅留在 archive）
+
+> ⚠️ 旧的 `run_sensitivity_analysis.py` 及其依赖模块已迁移到 `sensitivity_analysis/scripts/archive/`，缺失的 `ExperimentManager` 组件暂不维护，仅作历史参考；请使用 `scripts/multi_model_*` + `analyze_predictions.py` 或 `scripts/sa.py` 运行新的流程。
 ```
+
+## ⚗️ 实验标准流程
+
+1.  **Mini Test100 链路 (冒烟测试)**
+    *   使用 200 条平衡样本 (100正/100负) 进行快速验证。
+    *   验证训练、推理、分析全链路是否畅通。
+    *   **命令**: `python scripts/sa.py quick --dry-run` 然后执行 `scripts/multi_model_*` 流程。
+
+2.  **正式大规模链路**
+    *   在 Mini 验证通过后，扩展至 1k, 2k, 5k, 10k, 20k 数据规模。
+    *   生成全量 LoRA 权重和推理结果。
+
+3.  **分析与绘图 (Analyze & Plot)**
+    *   解析 JSONL 结果，生成 CSV 指标。
+    *   绘制折线图/柱状图/散点图。
+    *   **命令**: `python scripts/analyze_predictions.py --plot ...`
 
 ## 🚀 快速开始
 

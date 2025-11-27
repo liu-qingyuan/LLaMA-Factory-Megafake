@@ -60,11 +60,12 @@ class SensitivityAnalysis:
         self.logger.info(f"🚀 初始化敏感性分析 (mode: {mode}, type: {analysis_type})")
         self.logger.info(f"📊 使用模型: {self.models}")
         self.logger.info(f"📊 使用数据集: {self.datasets}")
+        self.logger.info(f"📂 输出目录: {self.output_dir.resolve()}")
 
     def setup_logging(self):
         """设置日志"""
-        log_dir = self.output_dir / "logs"
-        log_dir.mkdir(exist_ok=True)
+        log_dir = project_root / "sensitivity_analysis" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
 
         log_file = log_dir / f"sensitivity_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
@@ -129,10 +130,16 @@ class SensitivityAnalysis:
             return False
 
         model_path = f"/root/autodl-tmp/models/{self.models[0]}"
-        template = MODEL_CONFIGS.get(model_path, ("qwen", True))[0]
+        # template = MODEL_CONFIGS.get(model_path, ("qwen", True))[0]
+        # Fix: MODEL_CONFIGS might be using keys as absolute paths
+        template = "qwen"
+        for k, v in MODEL_CONFIGS.items():
+            if k == model_path or Path(k).name == self.models[0]:
+                template = v[0]
+                break
 
-        test_output = self.output_dir / "test_vllm.jsonl"
-        test_output.parent.mkdir(exist_ok=True)
+        test_output = project_root / "sensitivity_analysis" / "outputs" / "test_vllm.jsonl"
+        test_output.parent.mkdir(parents=True, exist_ok=True)
 
         cmd = [
             "python", "scripts/vllm_infer.py",
@@ -149,7 +156,7 @@ class SensitivityAnalysis:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
 
             if result.returncode == 0 and test_output.exists():
-                self.logger.info("✅ VLLM推理测试成功")
+                self.logger.info(f"✅ VLLM推理测试成功: {test_output}")
                 return True
             else:
                 self.logger.error(f"❌ VLLM推理测试失败: {result.stderr}")
@@ -165,7 +172,7 @@ class SensitivityAnalysis:
 
         # 使用原有的sensitivity_analysis.py进行测试
         test_cmd = [
-            "python", "scripts/sensitivity_analysis.py",
+            "python", "scripts/sa.py",
             "--quick-test"
         ]
 

@@ -813,5 +813,20 @@
       "prompt": "content"
     },
     "folder": "python"
+  },
+  "task1_scale_1000_glm": {
+    "file_name": "data_table/task1/scale_experiment/alpaca_megafake_glm_1000.json"
+  },
+  "task1_scale_2000_glm": {
+    "file_name": "data_table/task1/scale_experiment/alpaca_megafake_glm_2000.json"
+  },
+  "task1_scale_5000_glm": {
+    "file_name": "data_table/task1/scale_experiment/alpaca_megafake_glm_5000.json"
+  },
+  "task1_scale_10000_glm": {
+    "file_name": "data_table/task1/scale_experiment/alpaca_megafake_glm_10000.json"
+  },
+  "task1_scale_20000_glm": {
+    "file_name": "data_table/task1/scale_experiment/alpaca_megafake_glm_20000.json"
   }
 }
