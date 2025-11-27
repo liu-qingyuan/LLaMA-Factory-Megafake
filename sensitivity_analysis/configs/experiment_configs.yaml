@@ -1,0 +1,189 @@
+# 敏感性分析实验配置文件
+# Sensitivity Analysis Experiment Configuration
+
+# 全局实验配置
+global:
+  random_seed: 42
+  output_base_dir: "experiments/sensitivity_analysis"
+  log_level: "INFO"
+  gpu_memory_fraction: 0.9
+  max_concurrent_experiments: 1  # 单GPU环境
+  enable_checkpointing: true
+  enable_auto_cleanup: true
+  cleanup_interval: 10  # 每10个实验清理一次
+
+# 数据敏感性分析配置
+data_sensitivity:
+  enabled: true
+  datasets:
+    # Task 1数据集
+    task1_glm:
+      path: "data/data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json"
+      name: "Task1 GLM Binary"
+      description: "GLM生成的Task1二分类数据集"
+
+    task1_llama:
+      path: "data/data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json"
+      name: "Task1 LLaMA Binary"
+      description: "LLaMA生成的Task1二分类数据集"
+
+    # Task 2数据集 (选择性)
+    task2_glm_style_based:
+      path: "data/data_table/task2/alpaca_full/glm/alpaca_glm_style_based_fake.json"
+      name: "Task2 GLM Style-based"
+      description: "GLM风格基假新闻检测"
+
+    task2_llama_content_based:
+      path: "data/data_table/task2/alpaca_full/llama/alpaca_llama3_content_based_fake.json"
+      name: "Task2 LLaMA Content-based"
+      description: "LLaMA内容基假新闻检测"
+
+  data_sizes: [1000, 2000, 5000, 10000, 20000, "Full"]  # 完整数据集大小
+
+  # 数据采样配置
+  sampling:
+    method: "stratified"  # 分层采样
+    preserve_distribution: true  # 保持原始分布
+    min_samples_per_class: 50  # 每类最小样本数
+    max_retries: 3  # 采样失败重试次数
+
+  # 数据质量测试
+  quality_tests:
+    enabled: true
+    noise_levels: [0.0, 0.1, 0.2]  # 噪声水平
+    noise_types: ["random", "systematic"]  # 噪声类型
+
+# LoRA参数敏感性分析配置
+lora_sensitivity:
+  enabled: true
+  parameter_ranges:
+    r: [8, 16]  # 避免使用rank 32以防止VLLM错误
+    alpha: [16, 32]
+    dropout: [0.0, 0.1]
+
+  # 测试策略
+  test_strategy: "grid_search"  # 网格搜索
+  max_combinations: 20  # 最大组合数限制
+
+# 训练参数敏感性分析配置
+training_sensitivity:
+  enabled: true
+  parameter_ranges:
+    batch_size: [8, 16]
+    learning_rate: [1e-5, 2e-5, 5e-5]
+    epochs: [1, 3]
+
+  # 训练配置
+  training:
+    gradient_accumulation_steps: 1
+    warmup_ratio: 0.1
+    weight_decay: 0.01
+    max_grad_norm: 1.0
+    lr_scheduler_type: "cosine"
+
+# 推理参数敏感性分析配置
+inference_sensitivity:
+  enabled: true
+  parameter_ranges:
+    temperature: [0.1, 0.7, 1.0]
+    top_p: [0.8, 0.9, 0.95]
+    max_new_tokens: [50, 100]
+    do_sample: [true, false]
+
+# 模型对比配置
+model_comparison:
+  enabled: true
+  models: ["llama3_8b", "chatglm3_6b", "qwen1_5_7b", "baichuan2_7b", "mistral_7b"]  # 排除72B大模型
+  metrics: ["accuracy", "f1_macro", "precision", "recall", "inference_speed", "memory_usage"]
+
+  # 对比维度
+  comparison_dimensions:
+    - data_efficiency  # 数据效率
+    - parameter_efficiency  # 参数效率
+    - computational_efficiency  # 计算效率
+    - robustness  # 鲁棒性
+
+# 评估配置
+evaluation:
+  metrics:
+    classification: ["accuracy", "f1_macro", "f1_micro", "precision", "recall", "auc"]
+    efficiency: ["training_time", "inference_speed", "memory_usage", "gpu_utilization"]
+    robustness: ["adversarial_resistance", "noise_tolerance"]
+
+  # 交叉验证配置
+  cross_validation:
+    enabled: true
+    folds: 3  # 减少折数以加快速度
+    stratified: true
+
+# 可视化配置
+visualization:
+  enabled: true
+  plot_types:
+    - "sensitivity_curves"
+    - "parameter_heatmaps"
+    - "performance_comparison"
+    - "efficiency_analysis"
+    - "robustness_analysis"
+
+  # 图表配置
+  figure_settings:
+    figsize: [12, 8]
+    dpi: 300
+    format: "png"
+    style: "seaborn-v0_8"
+    color_palette: "viridis"
+
+# 报告配置
+reporting:
+  enabled: true
+  formats: ["html", "pdf", "markdown"]
+
+  # 报告内容
+  sections:
+    - "executive_summary"
+    - "methodology"
+    - "results"
+    - "analysis"
+    - "conclusions"
+    - "recommendations"
+    - "appendix"
+
+# 实验执行配置
+execution:
+  # 并行配置
+  parallel:
+    enabled: false  # 单GPU环境禁用并行
+    max_workers: 1
+
+  # 检查点配置
+  checkpointing:
+    enabled: true
+    save_interval: 10  # 每10个实验保存一次
+    keep_last_n: 3  # 保留最近3个检查点
+
+  # 错误处理
+  error_handling:
+    max_retries: 3
+    retry_delay: 60  # 秒
+    continue_on_error: true
+
+  # 资源管理
+  resource_management:
+    memory_threshold: 0.9  # 90%内存使用率阈值
+    disk_threshold: 0.8   # 80%磁盘使用率阈值
+    gpu_monitoring: true
+
+# 快速测试配置 (用于开发验证)
+quick_test:
+  enabled: false  # 默认关闭，可通过命令行启用
+
+  # 快速测试参数
+  models: ["qwen1_5_7b"]  # 使用Qwen模型测试
+  data_sizes: [10, 100]  # 超小规模数据，快速验证流程
+  lora_r: [8, 16]  # 使用小于16的LoRA rank避免VLLM错误
+  batch_size: [16]  # 只测试一个batch size
+
+  # 快速评估
+  cross_validation:
+    folds: 2  # 只用2折交叉验证

@@ -38,6 +38,9 @@
   "task1_test100_cot_sc_llama": {
     "file_name": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_llama_binary.json"
   },
+  "task1_test200_balanced_glm": {
+    "file_name": "data_table/task1/alpaca_test100_balanced/alpaca_megafake_glm_test200_balanced.json"
+  },
   "task1_test100_fs_5_glm": {
     "file_name": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_glm_binary.json"
   },

@@ -8,11 +8,12 @@ import datetime
 
 # 模型配置：模型路径 -> 模板名称
 MODEL_CONFIGS = {
-    "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
-    "/root/autodl-tmp/models/chatglm3-6b": "chatglm3", 
     "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": "llama3",
+    "/root/autodl-tmp/models/Qwen1.5-7B": "qwen",
+    "/root/autodl-tmp/models/Qwen1.5-72B": "qwen",
+    "/root/autodl-tmp/models/chatglm3-6b": "chatglm3",
     "/root/autodl-tmp/models/Mistral-7B-Instruct-v0.1": "mistral",
-    "/root/autodl-tmp/models/Qwen1.5-7B": "qwen"
+    "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
 }
 
 # 数据集配置
@@ -31,12 +32,11 @@ DATASET_CONFIGS = {
     # "task1_full_zs_df_llama": "data_table/task1/alpaca_full_ZS_DF/zs_df_megafake_llama_binary.json",
     
     # Task1 - 多种推理配置数据集 (测试版100条)
-    "task1_test100_cot_sc_glm": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_glm_binary.json",
-    "task1_test100_cot_sc_llama": "data_table/task1/alpaca_test100_CoT_SC/test100_cot_sc_megafake_llama_binary.json",
-    "task1_test100_fs_5_glm": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_glm_binary.json",
-    "task1_test100_fs_5_llama": "data_table/task1/alpaca_test100_FS_5/test100_fs_5_megafake_llama_binary.json",
-    "task1_test100_zs_df_glm": "data_table/task1/alpaca_test100_ZS_DF/test100_zs_df_megafake_glm_binary.json",
-    "task1_test100_zs_df_llama": "data_table/task1/alpaca_test100_ZS_DF/test100_zs_df_megafake_llama_binary.json",
+    # "task1_test100_cot_sc_glm": "...",
+    # "task1_test100_cot_sc_llama": "...",
+    # ...
+    # Mini Test100 平衡数据集（100正/100负）
+    "task1_test200_balanced_glm": "data_table/task1/alpaca_test100_balanced/alpaca_megafake_glm_test200_balanced.json",
     
     # Task2 - GLM 假新闻子类
     # "task2_full_glm_style_based_fake": "data_table/task2/alpaca_full/glm/alpaca_glm_style_based_fake.json",
@@ -102,17 +102,19 @@ def get_save_path(model_path, dataset_name):
             size = "full"
         elif "test100" in dataset_name:
             size = "test100"
+        elif "test200" in dataset_name:
+            size = "test200_balanced"
         else:
             size = "small"
         
         if "glm" in dataset_name:
             if reasoning_type:
-                if size == "test100":
+                if size in ("test100", "test200_balanced"):
                     data_type = f"test100_{reasoning_type.lower()}_megafake_glm_binary"
                 else:
                     data_type = f"{reasoning_type.lower()}_megafake_glm_binary"
             else:
-                data_type = "megafake_glm_binary"
+                data_type = "megafake_glm_binary" if size != "test200_balanced" else "test200_balanced_megafake_glm_binary"
         else:
             if reasoning_type:
                 if size == "test100":
@@ -188,6 +190,8 @@ def run_inference(model_path, template, dataset_name, save_path, max_new_tokens=
             max_new_tokens = 256  # ZS-DF需要中等长度的输出
         elif "fs_5" in dataset_name:
             max_new_tokens = 128  # FS-5需要适中的输出
+        elif "test200" in dataset_name:
+            max_new_tokens = 64   # Mini Test100平衡集
         else:
             max_new_tokens = 30   # 原始数据集的默认值
     

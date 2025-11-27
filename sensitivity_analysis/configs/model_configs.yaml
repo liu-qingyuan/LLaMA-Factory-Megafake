@@ -1,0 +1,165 @@
+# LLM模型配置文件 - 敏感性分析
+# Model Configurations for Sensitivity Analysis
+
+# 支持的LLM模型配置
+models:
+  # LLaMA系列
+  llama3_8b:
+    name: "Meta-Llama-3.1-8B-Instruct"
+    path: "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct"
+    template: "llama3"
+    trust_remote_code: true
+    family: "llama"
+    size: "8B"
+    parameters:
+      batch_size: 16
+      learning_rate: 2e-5
+      epochs: 1
+      max_length: 2048
+      use_fp16: true
+
+  # ChatGLM系列
+  chatglm3_6b:
+    name: "chatglm3-6b"
+    path: "/root/autodl-tmp/models/chatglm3-6b"
+    template: "chatglm3"
+    trust_remote_code: true
+    family: "chatglm"
+    size: "6B"
+    parameters:
+      batch_size: 16
+      learning_rate: 2e-5
+      epochs: 1
+      max_length: 2048
+      use_fp16: true
+
+  # Qwen系列
+  qwen1_5_7b:
+    name: "Qwen1.5-7B"
+    path: "/root/autodl-tmp/models/Qwen1.5-7B"
+    template: "qwen"
+    trust_remote_code: true
+    family: "qwen"
+    size: "7B"
+    parameters:
+      batch_size: 16
+      learning_rate: 2e-5
+      epochs: 1
+      max_length: 2048
+      use_fp16: true
+
+  qwen1_5_72b:
+    name: "Qwen1.5-72B"
+    path: "/root/autodl-tmp/models/Qwen1.5-72B"
+    template: "qwen"
+    trust_remote_code: true
+    family: "qwen"
+    size: "72B"
+    parameters:
+      batch_size: 4  # 大模型使用较小batch
+      learning_rate: 1e-5
+      epochs: 1
+      max_length: 2048
+      use_fp16: true
+
+  # Baichuan系列
+  baichuan2_7b:
+    name: "Baichuan2-7B-Chat"
+    path: "/root/autodl-tmp/models/Baichuan2-7B-Chat"
+    template: "baichuan2"
+    trust_remote_code: true
+    family: "baichuan"
+    size: "7B"
+    parameters:
+      batch_size: 16
+      learning_rate: 2e-5
+      epochs: 1
+      max_length: 2048
+      use_fp16: true
+
+  # Mistral系列
+  mistral_7b:
+    name: "Mistral-7B-v0.1"
+    path: "/root/autodl-tmp/models/Mistral-7B-v0.1"
+    template: "mistral"
+    trust_remote_code: false
+    family: "mistral"
+    size: "7B"
+    parameters:
+      batch_size: 16
+      learning_rate: 2e-5
+      epochs: 1
+      max_length: 2048
+      use_fp16: true
+
+# 默认LoRA配置
+default_lora_config:
+  r: 16
+  alpha: 32
+  dropout: 0.1
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+# 敏感性分析参数范围
+sensitivity_ranges:
+  # LoRA参数敏感性范围
+  lora_r: [8, 16, 32]  # 限制最大rank为32
+  lora_alpha: [16, 32, 64, 128]
+  lora_dropout: [0.0, 0.1, 0.2]
+
+  # 训练参数敏感性范围
+  batch_size: [8, 16, 32]
+  learning_rate: [1e-5, 2e-5, 5e-5, 1e-4]
+  epochs: [1, 3, 5]
+
+  # 数据量敏感性范围
+  data_sizes: [1000, 2000, 5000, 10000, 20000, "Full"]  # Based on reference docs, includes full dataset
+
+  # 推理参数敏感性范围
+  temperature: [0.1, 0.5, 0.8, 1.0]
+  top_p: [0.7, 0.9, 0.95]
+  max_length: [512, 1024, 2048]
+
+# 模型性能基准 (用于对比)
+performance_baselines:
+  llama3_8b:
+    base_accuracy: 0.85
+    base_f1: 0.82
+    base_speed: 1.0
+    memory_usage: 16.0  # GB
+
+  chatglm3_6b:
+    base_accuracy: 0.83
+    base_f1: 0.80
+    base_speed: 1.1
+    memory_usage: 12.0  # GB
+
+  qwen1_5_7b:
+    base_accuracy: 0.84
+    base_f1: 0.81
+    base_speed: 1.2
+    memory_usage: 14.0  # GB
+
+  qwen1_5_72b:
+    base_accuracy: 0.88
+    base_f1: 0.86
+    base_speed: 0.3
+    memory_usage: 140.0  # GB
+
+  baichuan2_7b:
+    base_accuracy: 0.84
+    base_f1: 0.81
+    base_speed: 1.1
+    memory_usage: 13.0  # GB
+
+  mistral_7b:
+    base_accuracy: 0.86
+    base_f1: 0.83
+    base_speed: 1.3
+    memory_usage: 14.0  # GB

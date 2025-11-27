@@ -1,0 +1,2 @@
+Model,Task,Accuracy,Legitimate_Precision,Legitimate_Recall,Legitimate_F1_Score,Fake_Precision,Fake_Recall,Fake_F1_Score
+Qwen1.5-7B-LoRA,Task1,0.6300,0.8421,0.3200,0.4638,0.5802,0.9400,0.7176

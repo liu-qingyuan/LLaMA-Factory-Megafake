@@ -6,25 +6,30 @@ import json
 from pathlib import Path
 import datetime
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
 # 模型配置：模型路径 -> 模板名称
 MODEL_CONFIGS = {
-    # "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
-    "/root/autodl-tmp/models/chatglm3-6b": "chatglm3", 
     "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": "llama3",
-    # "/root/autodl-tmp/models/Mistral-7B-v0.1": "mistral",
-    "/root/autodl-tmp/models/Qwen1.5-7B": "qwen"
+    "/root/autodl-tmp/models/Qwen1.5-7B": "qwen",
+    "/root/autodl-tmp/models/Qwen1.5-72B": "qwen",
+    "/root/autodl-tmp/models/chatglm3-6b": "chatglm3",
+    "/root/autodl-tmp/models/Mistral-7B-v0.1": "mistral",
+    "/root/autodl-tmp/models/Baichuan2-7B-Chat": "baichuan2",
 }
 
 # 数据集配置
 DATASET_CONFIGS = {
-    "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
-    "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json", 
+    # "task1_full_glm": "data_table/task1/alpaca_full/alpaca_megafake_glm_binary.json",
+    # "task1_full_llama": "data_table/task1/alpaca_full/alpaca_megafake_llama_binary.json",
     # "task1_small_glm": "data_table/task1/small_8k/alpaca_megafake_glm_8k.json",
     # "task1_small_llama": "data_table/task1/small_8k/alpaca_megafake_llama_8k.json",
-    "task3_full_gossip": "data_table/task3/alpaca_full/alpaca_chatglm_gossip_binary.json",
-    "task3_full_polifact": "data_table/task3/alpaca_full/alpaca_chatglm_polifact_binary.json",
+    # "task3_full_gossip": "data_table/task3/alpaca_full/alpaca_chatglm_gossip_binary.json",
+    # "task3_full_polifact": "data_table/task3/alpaca_full/alpaca_chatglm_polifact_binary.json",
     # "task3_small_gossip": "data_table/task3/small_8k/alpaca_chatglm_gossip_8k.json",
-    # "task3_small_polifact": "data_table/task3/small_8k/alpaca_chatglm_polifact_8k.json"
+    # "task3_small_polifact": "data_table/task3/small_8k/alpaca_chatglm_polifact_8k.json",
+    # Mini Test100 基准（100正/100负）
+    "task1_test200_balanced_glm": "data_table/task1/alpaca_test100_balanced/alpaca_megafake_glm_test200_balanced.json"
 }
 
 # Task3跨域实验映射：推理数据集 -> 训练数据集
@@ -63,8 +68,8 @@ def get_lora_adapter_path(model_path, dataset_name):
         # Task3: 跨域实验，使用映射表
         train_dataset = TASK3_CROSS_DOMAIN_MAPPING.get(dataset_name, dataset_name)
     
-    adapter_path = f"/root/autodl-tmp/LLaMA-Factory-Megafake2/megafakeTasks/{task}/{train_dataset}/{model_name}/lora/sft"
-    return adapter_path
+    adapter_path = REPO_ROOT / f"megafakeTasks/{task}/{train_dataset}/{model_name}/lora/sft"
+    return str(adapter_path)
 
 def get_save_path(model_path, dataset_name):
     """根据模型和数据集生成保存路径"""
@@ -75,6 +80,10 @@ def get_save_path(model_path, dataset_name):
         task = "task1"
         if "full" in dataset_name:
             size = "full"
+        elif "test100" in dataset_name:
+            size = "test100"
+        elif "test200" in dataset_name:
+            size = "test200_balanced"
         else:
             size = "small"
         
@@ -100,10 +109,10 @@ def get_save_path(model_path, dataset_name):
     if task == "task3" and dataset_name in TASK3_CROSS_DOMAIN_MAPPING:
         train_dataset = TASK3_CROSS_DOMAIN_MAPPING[dataset_name]
         train_type = "polifact" if "polifact" in train_dataset else "gossip"
-        save_path = f"megafakeTasks/{task}/{size}/result_{dataset_name}_{model_name}_LoRA_trained_on_{train_type}.jsonl"
+        save_path = REPO_ROOT / f"megafakeTasks/{task}/{size}/result_{dataset_name}_{model_name}_LoRA_trained_on_{train_type}.jsonl"
     else:
-        save_path = f"megafakeTasks/{task}/{size}/result_{dataset_name}_{model_name}_LoRA.jsonl"
-    return save_path
+        save_path = REPO_ROOT / f"megafakeTasks/{task}/{size}/result_{dataset_name}_{model_name}_LoRA.jsonl"
+    return str(save_path)
 
 def get_log_path(model_path, dataset_name):
     """生成日志文件路径"""

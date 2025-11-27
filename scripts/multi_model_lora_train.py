@@ -8,25 +8,37 @@ from pathlib import Path
 import datetime
 import tempfile
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+HF_CACHE_DIR = REPO_ROOT / ".cache" / "huggingface"
+HF_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+os.environ.setdefault("HF_HOME", str(HF_CACHE_DIR))
+os.environ.setdefault("HF_DATASETS_CACHE", str(HF_CACHE_DIR / "datasets"))
+os.environ.setdefault("HUGGINGFACE_HUB_CACHE", str(HF_CACHE_DIR / "hub"))
+
+
 # 模型配置：模型路径 -> (模板名称, trust_remote_code)
 MODEL_CONFIGS = {
-    # "/root/autodl-tmp/models/Baichuan2-7B-Chat": ("baichuan2", True),
-    "/root/autodl-tmp/models/chatglm3-6b": ("chatglm3", True), 
     "/root/autodl-tmp/models/Meta-Llama-3.1-8B-Instruct": ("llama3", True),
-    # "/root/autodl-tmp/models/Mistral-7B-v0.1": ("mistral", False),
-    "/root/autodl-tmp/models/Qwen1.5-7B": ("qwen", True)
+    "/root/autodl-tmp/models/Qwen1.5-7B": ("qwen", True),
+    "/root/autodl-tmp/models/Qwen1.5-72B": ("qwen", True),
+    "/root/autodl-tmp/models/chatglm3-6b": ("chatglm3", True),
+    "/root/autodl-tmp/models/Mistral-7B-v0.1": ("mistral", False),
+    "/root/autodl-tmp/models/Baichuan2-7B-Chat": ("baichuan2", True),
 }
 
 # 数据集配置
 DATASET_CONFIGS = {
+    # 旧版大规模实验仍可用：task1_small_*, task3_small_*, ...
     # "task1_full_glm": "task1_full_glm",
-    # "task1_full_llama": "task1_full_llama", 
-    "task1_small_glm": "task1_small_glm",
-    "task1_small_llama": "task1_small_llama",
+    # "task1_full_llama": "task1_full_llama",
+    # "task1_small_glm": "task1_small_glm",
+    # "task1_small_llama": "task1_small_llama",
     # "task3_full_gossip": "task3_full_gossip",
     # "task3_full_polifact": "task3_full_polifact",
-    "task3_small_gossip": "task3_small_gossip",
-    "task3_small_polifact": "task3_small_polifact"
+    # "task3_small_gossip": "task3_small_gossip",
+    # "task3_small_polifact": "task3_small_polifact",
+    # Mini Test100 数据集（100正/100负）用于快速验证整条流水线
+    "task1_test200_balanced_glm": "task1_test200_balanced_glm"
 }
 
 def get_model_name(model_path):
@@ -83,7 +95,7 @@ def create_config_file(model_path, template, trust_remote_code, dataset_name, ou
         "dataloader_num_workers": 4,
         
         # output
-        "output_dir": f"/root/autodl-tmp/LLaMA-Factory-Megafake2/{output_path}",
+        "output_dir": str(REPO_ROOT / output_path),
         "logging_steps": 10,
         "save_steps": 1000,
         "plot_loss": True,
@@ -98,7 +110,8 @@ def create_config_file(model_path, template, trust_remote_code, dataset_name, ou
         "num_train_epochs": 1.0,
         "lr_scheduler_type": "cosine",
         "warmup_ratio": 0.1,
-        "bf16": True,
+        "bf16": False,
+        "fp16": True,
         "ddp_timeout": 180000000,
         "resume_from_checkpoint": None
     }
@@ -145,7 +158,7 @@ def run_training(model_path, template, trust_remote_code, dataset_name, output_p
         
         # 创建日志目录和输出目录
         log_path = get_log_path(model_path, dataset_name)
-        full_output_path = f"/root/autodl-tmp/LLaMA-Factory-Megafake2/{output_path}"
+        full_output_path = str(REPO_ROOT / output_path)
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         os.makedirs(full_output_path, exist_ok=True)
         
